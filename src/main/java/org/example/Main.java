@@ -1,58 +1,54 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.example.model.*;
+import org.example.service.MovieService;
+import org.example.util.CSVReaderUtil;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        String actor = "src/main/resources/actors_large.csv";
-        String director = "src/main/resources/directors_large.csv";
-        String movie = "src/main/resources/movies_large.csv";
+        String actorFile = "src/main/resources/actors_large.csv";
+        String directorFile = "src/main/resources/directors_large.csv";
+        String movieFile = "src/main/resources/movies_large.csv";
 
-        List<String[]> actorData = readCSV(actor);
-        List<String[]> directorsData = readCSV(director);
-        List<String[]> moviesData = readCSV(movie);
+        List<String[]> actorData = CSVReaderUtil.readCSV(actorFile);
+        List<String[]> directorData = CSVReaderUtil.readCSV(directorFile);
+        List<String[]> movieData = CSVReaderUtil.readCSV(movieFile);
 
-        String[] header = moviesData.remove(0);
+        List<Movie> movies = movieData.stream().skip(1).map(row -> new Movie(
+                row[0], row[1], row[2], Double.parseDouble(row[3]), Integer.parseInt(row[4]), row[5],
+                Arrays.asList(row[6].split(";")))).collect(Collectors.toList());
 
-//        for (String[] row : actorData) {
-//            System.out.println(Arrays.toString(row));
-//        }
+        MovieService movieService = new MovieService(movies);
 
-    }
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\n1. Get Movie Information\n2. Get Top 10 Rated Movies\n3. Get Movies by Genre\n4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
 
-
-
-    public static List<String[]> readCSV(String filePath) {
-        List<String[]> csvData = new ArrayList<>();
-        File file = new File(filePath);
-
-        if (!file.exists()) {
-            System.err.println("Error: File not found - " + filePath);
-            return csvData;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-
-                for (int i = 0; i < values.length; i++) {
-                    values[i] = values[i].trim();
-                }
-
-                csvData.add(values);
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Movie ID: ");
+                    String movieId = scanner.nextLine();
+                    System.out.println(movieService.getMovieById(movieId));
+                    break;
+                case 2:
+                    movieService.getTopRatedMovies().forEach(System.out::println);
+                    break;
+                case 3:
+                    System.out.print("Enter Genre: ");
+                    String genre = scanner.nextLine();
+                    movieService.getMoviesByGenre(genre).forEach(System.out::println);
+                    break;
+                case 4:
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice!");
             }
-
-        } catch (IOException e) {
-            System.err.println("Error reading the file: " + e.getMessage());
         }
-
-        return csvData;
     }
 }
