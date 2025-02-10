@@ -24,17 +24,6 @@ public class Main {
 //            System.out.println(Arrays.toString(row));
 //        }
 
-        moviesData.sort((a, b) -> Double.compare(Double.parseDouble(b[4]), Double.parseDouble(a[4])));
-
-        // Get the top 10 movies
-        List<String[]> top10Movies = moviesData.subList(0, Math.min(10, moviesData.size()));
-
-        // Print the top 10 movies
-        System.out.println("Top 10 Movies by Rating:");
-        for (String[] movieData : top10Movies) {
-            System.out.println(String.join(", ", movie));
-        }
-
     }
 
 
